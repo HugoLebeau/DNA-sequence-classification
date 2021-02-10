@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-from functions import sigmoid, stats, logistic_regression
+from functions import sigmoid, printStats, logistic_regression
 
 np.random.seed(14159)
 
@@ -49,8 +49,8 @@ Yte_predicted = pd.DataFrame(index=Xte.index)
 # Logisitic regression
 w_train = logistic_regression(Xtr_mat100[id_train].values, Ytr["Bound"][id_train].values)
 predicted = np.where(sigmoid(np.dot(Xtr_mat100[id_eval], w_train)) > 0.5, 1, 0)
-precision, recall = stats(predicted, Ytr["Bound"][id_eval].values)
-print("Logistic regression: precision={:.0%}, recall={:.0%}.".format(precision, recall))
+print("LOGISTIC REGRESSION")
+printStats(predicted, Ytr["Bound"][id_eval].values)
 
 w = logistic_regression(Xtr_mat100.values, Ytr["Bound"].values)
 Yte_predicted["LogReg"] = np.where(sigmoid(np.dot(Xte_mat100, w)) > 0.5, 1, 0)
@@ -59,4 +59,4 @@ Yte_predicted["LogReg"] = np.where(sigmoid(np.dot(Xte_mat100, w)) > 0.5, 1, 0)
 
 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 for c in Yte_predicted.columns:
-    Yte_predicted[[c]].to_csv("res/Yte_predicted_"+c+"_"+now+".csv")
+    Yte_predicted[[c]].rename(columns={c: "Bound"}).to_csv("res/Yte_predicted_"+c+"_"+now+".csv")
