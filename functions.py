@@ -6,6 +6,7 @@ sigmoid = lambda u: 1./(1.+np.exp(-u))
 sigmoidp = lambda u: sigmoid(u)*(1.-sigmoid(u))
 
 def stats(predicted, true):
+    ''' Precision and recall computation '''
     precision = np.sum(predicted & true)/np.sum(predicted) # TP / (TP + FP)
     recall = np.sum(predicted & true)/np.sum(true) # TP / (TP + FN)
     return precision, recall
