@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
+from functions import sigmoid, stats, logistic_regression
+
+np.random.seed(14159)
+
 # %% LOAD DATA
 
 # Training data
@@ -31,15 +35,28 @@ Xte1_mat100 = pd.read_csv("data/Xte1_mat100.csv", sep=' ', header=None)
 Xte2_mat100 = pd.read_csv("data/Xte2_mat100.csv", sep=' ', header=None)
 Xte_mat100 = pd.concat([Xte0_mat100, Xte1_mat100, Xte2_mat100], axis=0).reset_index(drop=True)
 
-# %% 
+# %% Train/eval split
 
-#########
-# TO DO #
-#########
+prop_eval = 10/100 # proportion of the training set dedicated to evaluation
+id_eval = np.random.choice(Xtr.index, np.int(Xtr.shape[0]*prop_eval), replace=False)
+id_eval = np.isin(np.arange(Xtr.shape[0]), id_eval)
+id_train = ~id_eval
 
-Yte_predicted = pd.DataFrame(np.random.randint(0, 2, 3000), columns=["Bound"], index=Xte.index)
+# %%
+
+Yte_predicted = pd.DataFrame(index=Xte.index)
+
+# Logisitic regression
+w_train = logistic_regression(Xtr_mat100[id_train].values, Ytr["Bound"][id_train].values)
+predicted = np.where(sigmoid(np.dot(Xtr_mat100[id_eval], w_train)) > 0.5, 1, 0)
+precision, recall = stats(predicted, Ytr["Bound"][id_eval].values)
+print("Logistic regression: precision={:.0%}, recall={:.0%}.".format(precision, recall))
+
+w = logistic_regression(Xtr_mat100.values, Ytr["Bound"].values)
+Yte_predicted["LogReg"] = np.where(sigmoid(np.dot(Xte_mat100, w)) > 0.5, 1, 0)
 
 # %% SAVE PREDICTED VALUES
 
 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-Yte_predicted.to_csv("res/Yte_predicted_"+now+".csv")
+for c in Yte_predicted.columns:
+    Yte_predicted[[c]].to_csv("res/Yte_predicted_"+c+"_"+now+".csv")
