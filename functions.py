@@ -1,6 +1,7 @@
 import numpy as np
+from scipy.special import expit
 
-sigmoid = lambda u: 1./(1.+np.exp(-u))
+sigmoid = expit
 sigmoidp = lambda u: sigmoid(u)*sigmoid(-u)
 
 def printStats(predicted, true):
