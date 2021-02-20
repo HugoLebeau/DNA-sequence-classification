@@ -1,7 +1,7 @@
 import numpy as np
 
 sigmoid = lambda u: 1./(1.+np.exp(-u))
-sigmoidp = lambda u: sigmoid(u)*(1.-sigmoid(u))
+sigmoidp = lambda u: sigmoid(u)*sigmoid(-u)
 
 def printStats(predicted, true):
     ''' Precision, recall, accuracy '''
