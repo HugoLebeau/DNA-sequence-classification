@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 from functions import printStats
-from kernels import RBF_kernel
-from models import LogisticRegression, KernelRidgeRegression
+from kernels import RBF_kernel, linear_kernel
+from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression
 
 np.random.seed(14159)
 
-method = "LogReg"  # "LogReg" / "KernelRidge" / "KernelSVM"
+method = "KernelLogReg" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
+kernel = linear_kernel()
 
 # %% LOAD DATA
 
@@ -54,7 +55,9 @@ Yte_predicted = pd.DataFrame(index=Xte.index)
 if method == "LogReg":
     model = LogisticRegression()
 elif method == "KernelRidge":
-    model = KernelRidgeRegression(RBF_kernel)
+    model = KernelRidgeRegression(kernel, l2reg=1e-5)
+elif method == "KernelLogReg":
+    model = KernelLogisticRegression(kernel, l2reg=1e-5)
 
 model.fit(Xtr_mat100[id_train].values, Ytr["Bound"][id_train].values)
 predicted = model.predict(Xtr_mat100[id_eval])
@@ -69,7 +72,7 @@ print(method)
 printStats(predicted_labels, Ytr["Bound"][id_eval].values)
 
 model.fit(Xtr_mat100.values, Ytr["Bound"].values)
-Yte_predicted[method] = model.predict(Xte_mat100)
+Yte_predicted[method] = np.where(model.predict(Xte_mat100) > 0.5, 1, 0)
 
 # %% SAVE PREDICTED VALUES
 
