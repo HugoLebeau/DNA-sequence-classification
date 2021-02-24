@@ -5,11 +5,11 @@ from datetime import datetime
 
 from functions import printStats
 from kernels import RBF_kernel, linear_kernel
-from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression
+from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression, KernelSVM
 
 np.random.seed(14159)
 
-method = "KernelLogReg" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
+method = "KernelSVM" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
 kernel = linear_kernel()
 
 # %% LOAD DATA
@@ -58,6 +58,8 @@ elif method == "KernelRidge":
     model = KernelRidgeRegression(kernel, l2reg=1e-5)
 elif method == "KernelLogReg":
     model = KernelLogisticRegression(kernel, l2reg=1e-5)
+elif method == "KernelSVM":
+    model = KernelSVM(kernel, l2reg=1e-5)
 
 model.fit(Xtr_mat100[id_train].values, Ytr["Bound"][id_train].values)
 predicted = model.predict(Xtr_mat100[id_eval])

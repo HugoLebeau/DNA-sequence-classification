@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import optimize
+from scipy.optimize import LinearConstraint
 
 from functions import sigmoid, sigmoidp
 
@@ -191,6 +192,81 @@ class KernelLogisticRegression(object):
         self.weights = res.x
     
     def predict(self, X):
+        '''
+        Kernel Logistic Regression predict function. Evaluate the model on the
+        provided points.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n, d)
+            Features.
+
+        Returns
+        -------
+        y : ndarray, shape (n,)
+            Predicted labels.
+
+        '''
+        return sigmoid(self.kernel(X, self.training_points)@self.weights)
+
+class KernelSVM(object):
+    '''
+    SVM model.
+    '''
+    
+    def __init__(self, kernel, l2reg=0.001):
+        '''
+        SVM init function.
+
+        Parameters
+        ----------
+        kernel : callable(X1, X2) -> float
+            Kernel function returning cross-kernel matrix between X1 and X2
+            vectors.
+        l2reg : float
+            L2 Regularization parameter.
+
+        Returns
+        -------
+        None.
+
+        '''
+        self.kernel = kernel
+        self.l2reg = l2reg
+        self.training_points = None
+        self.weights = None
+    
+    def fit(self, X, y):
+        '''
+        SVM fit function. Compute the weights based onf
+        training points and labels using the provided kernel function.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n, d)
+            Features.
+        y : ndarray, shape (n,)
+            Labels.
+
+        Returns
+        -------
+        None.
+
+        '''
+        n, d = X.shape
+        K = self.kernel(X, X)
+        # "w = [alpha , ksi]
+        q = lambda w: -2*w @ y + w @ (K @ w)
+        constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg))
+        w0 = np.zeros([n])
+        res = optimize.minimize(q , w0 , constraints = [constraint])
+        
+        if not res.success:
+            print(res.message)
+        self.training_points = X
+        self.weights = res.x
+    
+    def predict(self, X): #A FINIR
         '''
         Kernel Logistic Regression predict function. Evaluate the model on the
         provided points.
