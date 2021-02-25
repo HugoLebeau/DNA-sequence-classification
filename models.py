@@ -2,6 +2,7 @@ import numpy as np
 from scipy import optimize
 from scipy.optimize import LinearConstraint
 from datetime import datetime
+from cvxopt import matrix, solvers
 
 from functions import *
 
@@ -254,25 +255,40 @@ class KernelSVM(object):
         None.
 
         '''
+        
+        
         n, d = X.shape
         print("dimensions :", n,d)
+        self.training_points = X
         K = self.kernel(X, X)
         # "w = [alpha , ksi]
-        q = lambda w: -2*w @ y + w @ (K @ w)
-        q_der = lambda w: -2*y + 2*K@w
-        q_hes = lambda w: 2*K
-        constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg)*np.ones(n))
-        w0 = np.zeros([n])
-        print("TEMP : optimizing")
-        t_previous = datetime.now()
-        res = optimize.minimize(q , w0 , method='trust-constr' , jac = q_der , hess = q_hes , constraints = constraint , options = {"maxiter" : 1 , "disp" : True})
-        print(datetime.now() - t_previous)
-        print("done.\n")
-        if not res.success:
-            print(res.message)
-        self.training_points = X
-        self.weights = res.x
-    
+        
+        #using scipy
+        # q = lambda w: -2*w @ y + w @ (K @ w)
+        # q_der = lambda w: -2*y + 2*K@w
+        # q_hes = lambda w: 2*K
+        # constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg)*np.ones(n))
+        # w0 = np.zeros([n])
+        # print("TEMP : optimizing")
+        # t_previous = datetime.now()
+        # res = optimize.minimize(q , w0 , method='trust-constr' , jac = q_der , hess = q_hes , constraints = constraint , options = {"maxiter" : 1 , "disp" : True})
+        # print(datetime.now() - t_previous)
+        # print("done.\n")
+        # if not res.success:
+        #     print(res.message)
+        
+        # self.weights = res.x
+        
+        #using cvxopt
+        print(y)
+        Q = matrix(2*K , tc='d')
+        p = matrix(-2*y , tc='d')
+        G = matrix(np.concatenate((np.diag(y) , -np.diag(y)) , axis = 0) , tc='d')
+        h = matrix(np.block([np.zeros([n]) , -np.ones([n])/(2.*n*self.l2reg)]) , tc = 'd')
+        sol = solvers.qp(Q , p , G , h)
+        self.weights = sol['x']
+        solvers.qp()
+        
     def predict(self, X): #A FINIR
         '''
         Kernel Logistic Regression predict function. Evaluate the model on the
