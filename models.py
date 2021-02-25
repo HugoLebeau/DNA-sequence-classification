@@ -2,7 +2,7 @@ import numpy as np
 from scipy import optimize
 from scipy.optimize import LinearConstraint
 
-from functions import sigmoid, sigmoidp
+from functions import *
 
 class LogisticRegression(object):
     '''
@@ -282,4 +282,4 @@ class KernelSVM(object):
             Predicted labels.
 
         '''
-        return sigmoid(self.kernel(X, self.training_points)@self.weights)
+        return self.kernel(X, self.training_points)@self.weights
