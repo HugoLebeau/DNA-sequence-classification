@@ -257,7 +257,7 @@ class KernelSVM(object):
         K = self.kernel(X, X)
         # "w = [alpha , ksi]
         q = lambda w: -2*w @ y + w @ (K @ w)
-        constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg))
+        constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg)*np.ones(n))
         w0 = np.zeros([n])
         res = optimize.minimize(q , w0 , constraints = [constraint])
         
