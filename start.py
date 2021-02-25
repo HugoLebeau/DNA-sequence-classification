@@ -9,7 +9,7 @@ from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegr
 
 np.random.seed(14159)
 
-method = "KernelLogReg" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
+method = "KernelSVM" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
 kernel = linear_kernel()
 
 print("choosen method :" , method)

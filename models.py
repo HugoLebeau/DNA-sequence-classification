@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import optimize
 from scipy.optimize import LinearConstraint
+from datetime import datetime
 
 from functions import *
 
@@ -254,13 +255,19 @@ class KernelSVM(object):
 
         '''
         n, d = X.shape
+        print("dimensions :", n,d)
         K = self.kernel(X, X)
         # "w = [alpha , ksi]
         q = lambda w: -2*w @ y + w @ (K @ w)
+        q_der = lambda w: -2*y + 2*K@w
+        q_hes = lambda w: 2*K
         constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg)*np.ones(n))
         w0 = np.zeros([n])
-        res = optimize.minimize(q , w0 , constraints = [constraint])
-        
+        print("TEMP : optimizing")
+        t_previous = datetime.now()
+        res = optimize.minimize(q , w0 , method='trust-constr' , jac = q_der , hess = q_hes , constraints = constraint , options = {"maxiter" : 1 , "disp" : True})
+        print(datetime.now() - t_previous)
+        print("done.\n")
         if not res.success:
             print(res.message)
         self.training_points = X
