@@ -287,7 +287,6 @@ class KernelSVM(object):
         h = matrix(np.block([np.zeros([n]) , -np.ones([n])/(2.*n*self.l2reg)]) , tc = 'd')
         sol = solvers.qp(Q , p , G , h)
         self.weights = sol['x']
-        solvers.qp()
         
     def predict(self, X): #A FINIR
         '''
