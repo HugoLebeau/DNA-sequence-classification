@@ -1,10 +1,8 @@
 import numpy as np
 from scipy import optimize
-from scipy.optimize import LinearConstraint
-from datetime import datetime
 from cvxopt import matrix, solvers
 
-from functions import *
+from functions import sigmoid, sigmoidp
 
 class LogisticRegression(object):
     '''
@@ -46,8 +44,7 @@ class LogisticRegression(object):
         hess_nlogL = lambda w: ((sigmoidp(X@w).reshape((n, 1))*X).T)@X
         w0 = np.zeros(d)
         res = optimize.minimize(nlogL, w0, method='Newton-CG', jac=jac_nlogL, hess=hess_nlogL)
-        if not res.success:
-            print(res.message)
+        print(res.message)
         self.training_points = X
         self.weights = res.x
     
@@ -182,14 +179,14 @@ class KernelLogisticRegression(object):
 
         '''
         n, d = X.shape
+        y = 2*y-1
         K = self.kernel(X, X)
         loss = lambda w: np.mean(np.log(1+np.exp(-y*(K@w))))+self.l2reg*(w@K@w)
-        jac_loss = lambda w: ((-sigmoid(-y*(K@w))*K)@y)/n+2.*self.l2reg*(K@w)
+        jac_loss = lambda w: ((-sigmoid(-y*(K@w))*y)@K)/n+2.*self.l2reg*(K@w)
         hess_loss = lambda w: ((sigmoidp(y*(K@w))*(y**2)*K)@K)/n+2.*self.l2reg*K
         w0 = np.zeros(n)
         res = optimize.minimize(loss, w0, method='Newton-CG', jac=jac_loss, hess=hess_loss)
-        if not res.success:
-            print(res.message)
+        print(res.message)
         self.training_points = X
         self.weights = res.x
     
@@ -213,12 +210,12 @@ class KernelLogisticRegression(object):
 
 class KernelSVM(object):
     '''
-    SVM model.
+    Kernel SVM model.
     '''
     
     def __init__(self, kernel, l2reg=0.001):
         '''
-        SVM init function.
+        Kernel SVM init function.
 
         Parameters
         ----------
@@ -240,8 +237,8 @@ class KernelSVM(object):
     
     def fit(self, X, y):
         '''
-        SVM fit function. Compute the weights based onf
-        training points and labels using the provided kernel function.
+        Kernel SVM fit function. Compute the weights based on training points
+        and labels using the provided kernel function.
 
         Parameters
         ----------
@@ -255,43 +252,20 @@ class KernelSVM(object):
         None.
 
         '''
-        
-        
         n, d = X.shape
-        print("dimensions :", n,d)
-        self.training_points = X
+        y = 2*y-1
         K = self.kernel(X, X)
-        # "w = [alpha , ksi]
+        P = matrix(2.*K, tc='d')
+        q = matrix(-2.*y, tc='d')
+        G = matrix(np.concatenate((-np.diag(y), np.diag(y)), axis=0), tc='d')
+        h = matrix(np.block([np.zeros(n), np.ones(n)/(2.*n*self.l2reg)]), tc='d')
+        sol = solvers.qp(P, q, G, h)
+        self.training_points = X
+        self.weights = np.ravel(sol['x'])
         
-        #using scipy
-        # q = lambda w: -2*w @ y + w @ (K @ w)
-        # q_der = lambda w: -2*y + 2*K@w
-        # q_hes = lambda w: 2*K
-        # constraint = LinearConstraint(np.diag(y), np.zeros(n), 1/(2.*n*self.l2reg)*np.ones(n))
-        # w0 = np.zeros([n])
-        # print("TEMP : optimizing")
-        # t_previous = datetime.now()
-        # res = optimize.minimize(q , w0 , method='trust-constr' , jac = q_der , hess = q_hes , constraints = constraint , options = {"maxiter" : 1 , "disp" : True})
-        # print(datetime.now() - t_previous)
-        # print("done.\n")
-        # if not res.success:
-        #     print(res.message)
-        
-        # self.weights = res.x
-        
-        #using cvxopt
-        print(y)
-        Q = matrix(2*K , tc='d')
-        p = matrix(-2*y , tc='d')
-        G = matrix(np.concatenate((np.diag(y) , -np.diag(y)) , axis = 0) , tc='d')
-        h = matrix(np.block([np.zeros([n]) , -np.ones([n])/(2.*n*self.l2reg)]) , tc = 'd')
-        sol = solvers.qp(Q , p , G , h)
-        self.weights = sol['x']
-        
-    def predict(self, X): #A FINIR
+    def predict(self, X):
         '''
-        Kernel Logistic Regression predict function. Evaluate the model on the
-        provided points.
+        Kernel SVM predict function. Evaluate the model on the provided points.
 
         Parameters
         ----------
