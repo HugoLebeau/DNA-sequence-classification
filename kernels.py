@@ -38,7 +38,7 @@ class spectrum_kernel(object):
             Every new word in X1 is saved.
             Only words already seen in X1 are considered in X2.
             '''
-            indptr, indices, data = [0], [], []
+            indptr, indices, data = [0], [], [] # these will be filled in order to build a CSR matrix
             for seq in X:
                 for i in range(len(seq)-self.k+1):
                     if first or (seq[i:i+self.k] in vocabulary):
@@ -46,6 +46,7 @@ class spectrum_kernel(object):
                         indices.append(index)
                         data.append(1)
                 indptr.append(len(indices))
-            Phi.append(csr_matrix((data, indices, indptr), dtype=int)) # build a CSR matrix
+            shape = None if first else (X2.shape[0], Phi[0].get_shape()[1])
+            Phi.append(csr_matrix((data, indices, indptr), dtype=int, shape=shape))
             first = False
         return Phi[0].dot(Phi[1].transpose()).toarray()
