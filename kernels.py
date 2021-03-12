@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.sparse import csr_matrix
 from scipy.spatial.distance import cdist
 
 class RBF_kernel(object):
@@ -23,3 +24,28 @@ class linear_kernel(polynomial_kernel):
     def __init__(self):
         super(linear_kernel, self).__init__(1, 0.)
         self.name = "Linear kernel"
+
+class spectrum_kernel(object):
+    def __init__(self, k):
+        self.k = k
+        self.name = "{}-spectrum kernel".format(k)
+    def __call__(self, X1, X2):
+        vocabulary, Phi = {}, []
+        first = True
+        for X in [X1, X2]:
+            '''
+            Count the number of occurences of each word of length k.
+            Every new word in X1 is saved.
+            Only words already seen in X1 are considered in X2.
+            '''
+            indptr, indices, data = [0], [], []
+            for seq in X:
+                for i in range(len(seq)-self.k+1):
+                    if first or (seq[i:i+self.k] in vocabulary):
+                        index = vocabulary.setdefault(seq[i:i+self.k], len(vocabulary))
+                        indices.append(index)
+                        data.append(1)
+                indptr.append(len(indices))
+            Phi.append(csr_matrix((data, indices, indptr), dtype=int)) # build a CSR matrix
+            first = False
+        return Phi[0].dot(Phi[1].transpose()).toarray()
