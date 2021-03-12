@@ -100,7 +100,7 @@ class KernelRidgeRegression(object):
 
         Parameters
         ----------
-        X : ndarray, shape (n, d)
+        X : ndarray, shape (n,) or (n, d)
             Features.
         y : ndarray, shape (n,)
             Labels.
@@ -123,7 +123,7 @@ class KernelRidgeRegression(object):
 
         Parameters
         ----------
-        X : ndarray, shape (n, d)
+        X : ndarray, shape (n,) or (n, d)
             Features.
 
         Returns
@@ -178,7 +178,7 @@ class KernelLogisticRegression(object):
         None.
 
         '''
-        n, d = X.shape
+        n = X.shape[0]
         y = 2*y-1
         K = self.kernel(X, X)
         loss = lambda w: np.mean(np.log(1+np.exp(-y*(K@w))))+self.l2reg*(w@K@w)
@@ -197,7 +197,7 @@ class KernelLogisticRegression(object):
 
         Parameters
         ----------
-        X : ndarray, shape (n, d)
+        X : ndarray, shape (n,) or (n, d)
             Features.
 
         Returns
@@ -242,7 +242,7 @@ class KernelSVM(object):
 
         Parameters
         ----------
-        X : ndarray, shape (n, d)
+        X : ndarray, shape (n,) or (n, d)
             Features.
         y : ndarray, shape (n,)
             Labels.
@@ -252,7 +252,7 @@ class KernelSVM(object):
         None.
 
         '''
-        n, d = X.shape
+        n = X.shape[0]
         y = 2*y-1
         K = self.kernel(X, X)
         P = matrix(2.*K, tc='d')
@@ -269,7 +269,7 @@ class KernelSVM(object):
 
         Parameters
         ----------
-        X : ndarray, shape (n, d)
+        X : ndarray, shape (n,) or (n, d)
             Features.
 
         Returns
