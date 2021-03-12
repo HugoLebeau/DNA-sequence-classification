@@ -11,9 +11,10 @@ np.random.seed(14159)
 
 # kernel = RBF_kernel(sigma=1e-1)
 # kernel = linear_kernel()
-kernel = spectrum_kernel(5)
+kernel = spectrum_kernel(10)
 
 method = "KernelSVM" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
+l2reg = 1e-5
 
 mat100 = False
 
@@ -67,13 +68,13 @@ if method == "LogReg":
     model = LogisticRegression()
     threshold = 0.5
 elif method == "KernelRidge":
-    model = KernelRidgeRegression(kernel, l2reg=1e-5)
+    model = KernelRidgeRegression(kernel, l2reg=l2reg)
     threshold = 0.5
 elif method == "KernelLogReg":
-    model = KernelLogisticRegression(kernel, l2reg=1e-5)
+    model = KernelLogisticRegression(kernel, l2reg=l2reg)
     threshold = 0.5
 elif method == "KernelSVM":
-    model = KernelSVM(kernel, l2reg=1e-5)
+    model = KernelSVM(kernel, l2reg=l2reg)
     threshold = 0.
 
 print("Training...")
