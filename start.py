@@ -4,14 +4,15 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 from functions import printStats
-from kernels import RBF_kernel, linear_kernel, spectrum_kernel
+from kernels import RBF_kernel, linear_kernel, spectrum_kernel, mismatch_kernel
 from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression, KernelSVM
 
 np.random.seed(14159)
 
 # kernel = RBF_kernel(sigma=1e-1)
 # kernel = linear_kernel()
-kernel = spectrum_kernel(10)
+# kernel = spectrum_kernel(10)
+kernel = mismatch_kernel(10, 1)
 
 method = "KernelSVM" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
 l2reg = 1e-5
@@ -87,7 +88,7 @@ predicted0 = predicted[Ytr[id_eval] == 0]
 predicted1 = predicted[Ytr[id_eval] == 1]
 plt.hist([predicted0, predicted1], stacked=True, edgecolor='black', bins=20, label=[0, 1])
 plt.axvline(threshold, ls='--', color='black')
-plt.title("Histogram of predicted values")
+plt.title("Histogram of predicted values (eval)")
 plt.legend(title="True label")
 plt.show()
 
