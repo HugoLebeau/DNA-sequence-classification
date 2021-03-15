@@ -5,7 +5,7 @@ sigmoid = expit
 sigmoidp = lambda u: sigmoid(u)*sigmoid(-u)
 
 def printStats(predicted, true):
-    ''' Precision, recall, accuracy '''
+    ''' Precision, recall, accuracy. '''
     precision = np.sum(predicted & true)/np.sum(predicted) # TP / (TP + FP)
     recall = np.sum(predicted & true)/np.sum(true) # TP / (TP + FN)
     accuracy = (np.sum(predicted & true)+np.sum((1-predicted) & (1-true)))/len(true) # (TP + TN) / (P + N)
