@@ -56,7 +56,7 @@ else:
 # %% TRAIN/EVAL SPLIT
 
 prop_eval = 10/100  # proportion of the training set dedicated to evaluation
-id_eval = np.random.choice(Xtr.shape[0], np.int(Xtr.shape[0]*prop_eval), replace=False)
+id_eval = np.random.choice(Xtr.shape[0], int(Xtr.shape[0]*prop_eval), replace=False)
 id_eval = np.isin(np.arange(Xtr.shape[0]), id_eval)
 id_train = ~id_eval
 
