@@ -3,8 +3,6 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import cdist
 
-from trie import Trie
-
 class RBF_kernel(object):
     def __init__(self, sigma=1.):
         self.sigma = sigma
@@ -60,23 +58,32 @@ class mismatch_kernel(object):
         self.m = m
         self.name = "({}, {})-mismatch kernel".format(k, m)
     def __call__(self, X1, X2):
+        
+        def matching(seq, data, indices, vocabulary, alphabet, k, m, i=0, term='', mismatches=0):
+            ''' Depth first search for k-mers matching with seq. '''
+            if mismatches <= m:
+                if i < k:
+                    for char in alphabet:
+                        if seq[i] == char:
+                            matching(seq, data, indices, vocabulary, alphabet, k, m, i+1, term+char, mismatches)
+                        else:
+                            matching(seq, data, indices, vocabulary, alphabet, k, m, i+1, term+char, mismatches+1)
+                if i == k:
+                    index = vocabulary.setdefault(term, len(vocabulary))
+                    indices.append(index)
+                    data.append(1)
+        
+        alphabet = set(''.join(X1)).union(set(''.join(X2)))
         vocabulary, Phi = {}, []
         first = True
-        trie = Trie()
         for X in [X1, X2]:
             indptr, indices, data = [0], [], [] # these will be filled in order to build a CSR matrix
             for seq in tqdm(X):
                 for i in range(len(seq)-self.k+1):
-                    ls = [seq[i:i+self.k]] if first else trie.match(seq[i:i+self.k], self.m)
-                    for s in ls:
-                        index = vocabulary.setdefault(s, len(vocabulary))
-                        indices.append(index)
-                        data.append(1)
+                    matching(seq[i:i+self.k], data, indices, vocabulary, alphabet, self.k, self.m, 0, '', 0)
                 indptr.append(len(indices))
-            if first: # build Trie
-                for key in vocabulary.keys():
-                    trie.add_key(key)
             shape = None if first else (X2.shape[0], Phi[0].get_shape()[1])
             Phi.append(csr_matrix((data, indices, indptr), dtype=int, shape=shape))
             first = False
+        
         return Phi[0].dot(Phi[1].transpose()).toarray()
