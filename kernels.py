@@ -47,8 +47,10 @@ class spectrum_kernel(object):
                         indices.append(index)
                         data.append(1)
                 indptr.append(len(indices))
-            shape = None if first else (X2.shape[0], Phi[0].get_shape()[1])
-            Phi.append(csr_matrix((data, indices, indptr), dtype=int, shape=shape))
+            shape = None if first else (X2.shape[0], Phi[0].shape[1])
+            mat = csr_matrix((data, indices, indptr), dtype=int, shape=shape)
+            mat.sum_duplicates()
+            Phi.append(mat)
             first = False
         return Phi[0].dot(Phi[1].transpose()).toarray()
 
@@ -82,8 +84,16 @@ class mismatch_kernel(object):
                 for i in range(len(seq)-self.k+1):
                     matching(seq[i:i+self.k], data, indices, vocabulary, alphabet, self.k, self.m, 0, '', 0)
                 indptr.append(len(indices))
-            shape = None if first else (X2.shape[0], Phi[0].get_shape()[1])
-            Phi.append(csr_matrix((data, indices, indptr), dtype=int, shape=shape))
+            shape = None if first else (X2.shape[0], Phi[0].shape[1])
+            mat = csr_matrix((data, indices, indptr), dtype=int, shape=shape)
+            mat.sum_duplicates()
+            Phi.append(mat)
             first = False
         
-        return Phi[0].dot(Phi[1].transpose()).toarray()
+        # return Phi[0].dot(Phi[1].transpose()).toarray()
+        # dot product may cause segmentation fault on large matrices
+        # implementation below is much slower, but does not crash
+        out = np.zeros((Phi[0].shape[0], Phi[1].shape[0]), dtype=int)
+        for i in tqdm(range(Phi[1].shape[0])):
+            out[:, i] = Phi[0].dot(Phi[1].getrow(i).transpose()).toarray().ravel()
+        return out
