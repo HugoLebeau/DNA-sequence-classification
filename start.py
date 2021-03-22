@@ -9,8 +9,8 @@ from kernels import RBF_kernel, linear_kernel, spectrum_kernel, mismatch_kernel
 from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression, KernelSVM
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--k', type=str, default=10, metavar="K")
-parser.add_argument('--m', type=str, default=0, metavar="M")
+parser.add_argument('--k', type=int, default=10, metavar="K")
+parser.add_argument('--m', type=int, default=0, metavar="M")
 args = parser.parse_args()
 
 np.random.seed(14159)
