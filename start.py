@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,12 +8,17 @@ from functions import printStats
 from kernels import RBF_kernel, linear_kernel, spectrum_kernel, mismatch_kernel
 from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression, KernelSVM
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--k', type=str, default=10, metavar="K")
+parser.add_argument('--m', type=str, default=0, metavar="M")
+args = parser.parse_args()
+
 np.random.seed(14159)
 
 # kernel = RBF_kernel(sigma=1e-1)
 # kernel = linear_kernel()
 # kernel = spectrum_kernel(10)
-kernel = mismatch_kernel(10, 1)
+kernel = mismatch_kernel(args.k, args.m)
 
 method = "KernelSVM" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
 l2reg = 1e-5
