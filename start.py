@@ -9,23 +9,39 @@ from kernels import RBF_kernel, linear_kernel, spectrum_kernel, mismatch_kernel
 from models import LogisticRegression, KernelRidgeRegression, KernelLogisticRegression, KernelSVM
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--method', type=str, default="KernelSVM", metavar="METHOD")
+parser.add_argument('--l2reg', type=float, default=1e-5, metavar="L2REG")
 parser.add_argument('--k', type=int, default=10, metavar="K")
 parser.add_argument('--m', type=int, default=0, metavar="M")
 args = parser.parse_args()
+
+# %% INITIALISATION
 
 np.random.seed(14159)
 
 # kernel = RBF_kernel(sigma=1e-1)
 # kernel = linear_kernel()
-# kernel = spectrum_kernel(10)
+# kernel = spectrum_kernel(args.k)
 kernel = mismatch_kernel(args.k, args.m)
 
-method = "KernelLogReg" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
-l2reg = 1e-5
+if args.method == "LogReg":
+    model = LogisticRegression()
+    threshold = 0.5
+elif args.method == "KernelRidge":
+    model = KernelRidgeRegression(kernel, l2reg=args.l2reg)
+    threshold = 0.5
+elif args.method == "KernelLogReg":
+    model = KernelLogisticRegression(kernel, l2reg=args.l2reg)
+    threshold = 0.5
+elif args.method == "KernelSVM":
+    model = KernelSVM(kernel, l2reg=args.l2reg)
+    threshold = 0.
+else:
+    raise NotImplementedError
 
 mat100 = False
 
-print("Chosen method: {}.".format(method))
+print("Chosen method: {}.".format(args.method))
 print("Chosen kernel: {}.\n".format(kernel.name))
 
 # %% LOAD DATA
@@ -71,19 +87,6 @@ id_train = ~id_eval
 Yte_predicted = pd.DataFrame(index=range(Xte.shape[0]))
 Yte_predicted.index.name = "Id"
 
-if method == "LogReg":
-    model = LogisticRegression()
-    threshold = 0.5
-elif method == "KernelRidge":
-    model = KernelRidgeRegression(kernel, l2reg=l2reg)
-    threshold = 0.5
-elif method == "KernelLogReg":
-    model = KernelLogisticRegression(kernel, l2reg=l2reg)
-    threshold = 0.5
-elif method == "KernelSVM":
-    model = KernelSVM(kernel, l2reg=l2reg)
-    threshold = 0.
-
 print("Training...")
 model.fit(Xtr[id_train], Ytr[id_train])
 print("Done.\n")
@@ -103,7 +106,7 @@ printStats(predicted_labels, Ytr[id_eval])
 print("\nTraining...")
 model.fit(Xtr, Ytr)
 print("Done.")
-Yte_predicted[method] = np.where(model.predict(Xte) > threshold, 1, 0)
+Yte_predicted[args.method] = np.where(model.predict(Xte) > threshold, 1, 0)
 
 # %% SAVE PREDICTED VALUES
 
@@ -111,4 +114,4 @@ now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 for c in Yte_predicted.columns:
     name = "res/Yte_predicted_"+c+"_"+now+".csv"
     Yte_predicted[[c]].rename(columns={c: "Bound"}).to_csv(name)
-    print("Results saved as {}.".format(name))
+    print("Results saved in {}.".format(name))
