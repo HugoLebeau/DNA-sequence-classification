@@ -105,7 +105,7 @@ printStats(predicted_labels, Ytr[id_eval])
 
 print("\nTraining...")
 model.fit(Xtr, Ytr)
-print("Done.")
+print("Done.\n")
 Yte_predicted[args.method] = np.where(model.predict(Xte) > threshold, 1, 0)
 
 # %% SAVE PREDICTED VALUES
