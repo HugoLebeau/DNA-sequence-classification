@@ -109,4 +109,6 @@ Yte_predicted[method] = np.where(model.predict(Xte) > threshold, 1, 0)
 
 now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 for c in Yte_predicted.columns:
-    Yte_predicted[[c]].rename(columns={c: "Bound"}).to_csv("res/Yte_predicted_"+c+"_"+now+".csv")
+    name = "res/Yte_predicted_"+c+"_"+now+".csv"
+    Yte_predicted[[c]].rename(columns={c: "Bound"}).to_csv(name)
+    print("Results saved as {}.".format(name))
