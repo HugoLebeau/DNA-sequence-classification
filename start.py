@@ -20,7 +20,7 @@ np.random.seed(14159)
 # kernel = spectrum_kernel(10)
 kernel = mismatch_kernel(args.k, args.m)
 
-method = "KernelSVM" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
+method = "KernelLogReg" # "LogReg" / "KernelRidge" / "KernelLogReg" / "KernelSVM"
 l2reg = 1e-5
 
 mat100 = False
