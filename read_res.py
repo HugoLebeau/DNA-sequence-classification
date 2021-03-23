@@ -14,7 +14,7 @@ res[float_cols] = res[float_cols].stack().str.replace(',', '.').unstack().astype
 res["F-score"] = 2./(1./res["Precision"]+1./res["Recall"])
 
 # Sort values by F-score
-res.sort_values(by="F-score", ascending=False, inplace=True)
+res.sort_values(by="Accuracy", ascending=False, inplace=True)
 
 # Plot
 plt.plot(res["F-score"].values, label='F-score')
