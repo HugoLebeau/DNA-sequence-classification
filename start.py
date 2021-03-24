@@ -96,7 +96,7 @@ print("Done.\n")
 predicted = model.predict(Xtr[id_eval])
 
 if optimize_threshold:
-    thresholds = np.linspace(0.1, 0.9, 17)
+    thresholds = np.linspace(threshold-0.4, threshold+0.4, 17)
     benchmarks = []
     for thr in thresholds:
         benchmarks.append(printStats(np.where(predicted > thr, 1, 0), Ytr[id_eval], verbose=False))
@@ -118,7 +118,7 @@ if optimize_threshold:
     metric_considered = "accuracy"
     best_threshold = optimal_threshold[metric_considered]
     best_score = optimal_metric[metric_considered]
-    print(f"Best threshold at {round(best_threshold, 4)} for {metric_considered}: {round(best_score, 4)}.")
+    print(f"Best threshold at {round(best_threshold, 4)} with {metric_considered} {round(best_score, 4)}.")
 else:
     best_threshold = threshold
 
