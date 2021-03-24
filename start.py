@@ -131,7 +131,7 @@ best_threshold = optimal_threshold[metric_considered]
 best_score = optimal_metric[metric_considered]
 print(f"Best threshold at {round(best_threshold, 4)} for {metric_considered}: {round(best_score, 4)}")
 
-Yte_predicted[args.method] = np.where(Xte > best_threshold, 1, 0)
+Yte_predicted[args.method] = np.where(model.predict(Xte) > best_threshold, 1, 0)
 
 # %% SAVE PREDICTED VALUES
 
