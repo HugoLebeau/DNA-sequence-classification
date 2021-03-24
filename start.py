@@ -106,7 +106,32 @@ printStats(predicted_labels, Ytr[id_eval])
 print("\nTraining...")
 model.fit(Xtr, Ytr)
 print("Done.\n")
-Yte_predicted[args.method] = np.where(model.predict(Xte) > threshold, 1, 0)
+
+thresholds = np.linspace(0.1, 0.9, 17)
+benchmarks = []
+for thr in thresholds:
+    benchmarks.append(printStats(np.where(predicted > thr, 1, 0), Ytr[id_eval], verbose=False))
+
+optimal_metric = {
+    "accuracy": np.max([metric["accuracy"] for metric in benchmarks]),
+    "recall": np.max([metric["recall"] for metric in benchmarks]),
+    "precision": np.max([metric["precision"] for metric in benchmarks]),
+    "f1": np.max([metric["f1"] for metric in benchmarks]),
+    }
+
+optimal_threshold = {
+    "accuracy": thresholds[np.argmax([metric["accuracy"] for metric in benchmarks])],
+    "recall": thresholds[np.argmax([metric["recall"] for metric in benchmarks])],
+    "precision": thresholds[np.argmax([metric["precision"] for metric in benchmarks])],
+    "f1": thresholds[np.argmax([metric["f1"] for metric in benchmarks])],
+    }
+
+metric_considered = "accuracy"
+best_threshold = optimal_threshold[metric_considered]
+best_score = optimal_metric[metric_considered]
+print(f"Best threshold at {round(best_threshold, 4)} for {metric_considered}: {round(best_score, 4)}")
+
+Yte_predicted[args.method] = np.where(pred_sub > best_threshold, 1, 0)
 
 # %% SAVE PREDICTED VALUES
 
