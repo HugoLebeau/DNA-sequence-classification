@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--method', type=str, default="KernelSVM", metavar="METHOD")
 parser.add_argument('--l2reg', type=float, default=1e-5, metavar="L2REG")
 parser.add_argument('--k', type=int, default=10, metavar="K")
-parser.add_argument('--m', type=int, default=0, metavar="M")
+parser.add_argument('--m', type=int, default=1, metavar="M")
 parser.add_argument('--threshold', type=str, default=None, metavar="T")
 args = parser.parse_args()
 
