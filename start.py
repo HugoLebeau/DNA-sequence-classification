@@ -91,7 +91,6 @@ print("Training...")
 model.fit(Xtr[id_train], Ytr[id_train])
 print("Done.\n")
 predicted = model.predict(Xtr[id_eval])
-predicted_labels = np.where(predicted > threshold, 1, 0)
 
 predicted0 = predicted[Ytr[id_eval] == 0]
 predicted1 = predicted[Ytr[id_eval] == 1]
@@ -100,12 +99,6 @@ plt.axvline(threshold, ls='--', color='black')
 plt.title("Histogram of predicted values (eval)")
 plt.legend(title="True label")
 plt.show()
-
-printStats(predicted_labels, Ytr[id_eval])
-
-print("\nTraining...")
-model.fit(Xtr, Ytr)
-print("Done.\n")
 
 thresholds = np.linspace(0.1, 0.9, 17)
 benchmarks = []
@@ -116,20 +109,28 @@ optimal_metric = {
     "accuracy": np.max([metric["accuracy"] for metric in benchmarks]),
     "recall": np.max([metric["recall"] for metric in benchmarks]),
     "precision": np.max([metric["precision"] for metric in benchmarks]),
-    "f1": np.max([metric["f1"] for metric in benchmarks]),
+    "f1-score": np.max([metric["f1-score"] for metric in benchmarks]),
     }
 
 optimal_threshold = {
     "accuracy": thresholds[np.argmax([metric["accuracy"] for metric in benchmarks])],
     "recall": thresholds[np.argmax([metric["recall"] for metric in benchmarks])],
     "precision": thresholds[np.argmax([metric["precision"] for metric in benchmarks])],
-    "f1": thresholds[np.argmax([metric["f1"] for metric in benchmarks])],
+    "f1-score": thresholds[np.argmax([metric["f1-score"] for metric in benchmarks])],
     }
 
 metric_considered = "accuracy"
 best_threshold = optimal_threshold[metric_considered]
 best_score = optimal_metric[metric_considered]
 print(f"Best threshold at {round(best_threshold, 4)} for {metric_considered}: {round(best_score, 4)}")
+
+predicted_labels = np.where(predicted > best_threshold, 1, 0)
+
+printStats(predicted_labels, Ytr[id_eval])
+
+print("\nTraining...")
+model.fit(Xtr, Ytr)
+print("Done.\n")
 
 Yte_predicted[args.method] = np.where(model.predict(Xte) > best_threshold, 1, 0)
 
